@@ -92,7 +92,7 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
                   tick={{ fill: '#9ca3af' }}
                 />
                 <YAxis
-                  width={80}
+                  width={90}
                   className="text-xs text-gray-400"
                   tick={{ fill: '#9ca3af' }}
                   tickFormatter={(value) => formatCurrency(value)}
