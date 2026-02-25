@@ -50,3 +50,15 @@ export {
   DialogTitle,
   DialogDescription,
 } from './dialog';
+
+// Badge component (shadcn)
+export { Badge, badgeVariants } from './badge';
+export type { BadgeProps } from './badge';
+
+// Tooltip components (shadcn)
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from './tooltip';

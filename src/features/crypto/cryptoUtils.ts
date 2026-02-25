@@ -36,7 +36,8 @@ export function filterCoins(
 
 /**
  * Formats a number as currency (USD)
- * 
+ * For "micro" coins (price between -1 and 1, excluding 0), shows up to 6 decimals by default.
+ *
  * @param value - Number to format
  * @param options - Optional formatting options
  * @returns Formatted currency string
@@ -48,11 +49,12 @@ export function formatCurrency(
     maximumFractionDigits?: number;
   }
 ): string {
+  const isMicroCoin = value > -1 && value < 1 && value !== 0;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: options?.minimumFractionDigits ?? 2,
-    maximumFractionDigits: options?.maximumFractionDigits ?? 6,
+    maximumFractionDigits: options?.maximumFractionDigits ?? (isMicroCoin ? 6 : 2),
   }).format(value);
 }
 

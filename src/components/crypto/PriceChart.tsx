@@ -1,83 +1,53 @@
 /**
  * PriceChart Component
- * 
- * Displays real-time price history chart. Single modal instance managed at table level.
+ *
+ * Hybrid chart: 24h history from CoinGecko API + live price at the last point from WebSocket.
  */
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAppSelector } from '@/hooks/redux';
+import { useGetMarketChartQuery } from '@/features/crypto/cryptoApi';
 import { formatCurrency } from '@/features/crypto/cryptoUtils';
-import type { CryptoCoin } from '@/types/crypto';
+import type { PriceChartProps } from '@/types/components';
+import { useChartData } from '@/hooks/useChartData';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-interface PriceChartProps {
-  coin: CryptoCoin | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-function formatTime(timestamp: number): string {
-  const date = new Date(timestamp);
-  return date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
-}
-
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { timestamp: number } }> }) {
-  if (!active || !payload || payload.length === 0) return null;
-
-  const data = payload[0];
-  return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-3">
-      <p className="text-sm text-gray-400">
-        {formatTime(data.payload.timestamp)}
-      </p>
-      <p className="text-lg font-semibold text-white">
-        {formatCurrency(data.value)}
-      </p>
-    </div>
-  );
-}
+import { Loading } from '@/components/ui/loading';
+import { ChartTooltip } from './ChartTooltip';
+import { TEXT } from '@/constants/text';
+import {
+  CHART_LINE_COLOR,
+  CHART_GRID_STROKE,
+  CHART_Y_DOMAIN_MARGIN_MIN,
+  CHART_Y_DOMAIN_MARGIN_MAX,
+  CHART_DOT_RADIUS,
+} from '@/constants/chart';
 
 export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
-  if (!coin || !open) return null;
-
-  // Real-time updates: subscribes only to this coin's price history
-  const priceHistory = useAppSelector((state) => 
-    state.crypto.priceHistory[coin.id] ?? []
-  );
+  const { data: historyData, isLoading } = useGetMarketChartQuery(coin?.id ?? '', {
+    skip: !coin || !open,
+  });
 
   const currentPrice = useAppSelector((state) => {
+    if (!coin) return undefined;
     const update = state.crypto.updatedPrices[coin.id];
     return update?.price ?? coin.current_price;
   });
 
-  // No useMemo needed: small dataset (30 items) and modal resets on each open
-  const chartData = priceHistory.map((entry) => ({
-    timestamp: entry.timestamp,
-    price: entry.price,
-    time: formatTime(entry.timestamp),
-  }));
-  const firstPrice = chartData[0]?.price;
-  const lastPrice = chartData[chartData.length - 1]?.price;
-  const priceChange = chartData.length >= 2 && firstPrice
-    ? {
-        change: lastPrice - firstPrice,
-        changePercent: ((lastPrice - firstPrice) / firstPrice) * 100,
-      }
-    : null;
+  const { chartData, priceChange } = useChartData(historyData, currentPrice);
+
+  if (!coin) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-5xl bg-slate-900 text-white border-slate-700 max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="w-[95vw] max-w-5xl bg-slate-900 text-white border-slate-700 max-h-[90vh] overflow-y-auto"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle className="text-white text-lg sm:text-xl">
             {coin.name} ({coin.symbol.toUpperCase()}) Price Chart
@@ -88,7 +58,7 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
           <div>
             <p className="text-sm text-gray-400">Current Price</p>
             <p className="text-xl sm:text-2xl font-bold text-white">
-              {currentPrice ? formatCurrency(currentPrice) : 'N/A'}
+              {currentPrice ? formatCurrency(currentPrice) : TEXT.common.notAvailable}
             </p>
           </div>
           {priceChange && (
@@ -107,42 +77,60 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
           )}
         </div>
 
-        {chartData.length > 0 ? (
-          <div className="h-64 sm:h-80 lg:h-96 w-full">
-            <ResponsiveContainer width="100%" height="100%">
+        {isLoading ? (
+          <div className="h-64 sm:h-80 lg:h-96 w-full flex items-center justify-center">
+            <Loading message={TEXT.chart.loading} />
+          </div>
+        ) : chartData.length > 0 ? (
+          <div className="w-full" style={{ height: 384 }}>
+            <ResponsiveContainer width="100%" height={384}>
               <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" opacity={0.5} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID_STROKE} opacity={0.5} />
                 <XAxis
                   dataKey="time"
                   className="text-xs text-gray-400"
                   tick={{ fill: '#9ca3af' }}
                 />
                 <YAxis
+                  width={80}
                   className="text-xs text-gray-400"
                   tick={{ fill: '#9ca3af' }}
                   tickFormatter={(value) => formatCurrency(value)}
-                  domain={['auto', 'auto']}
+                  domain={[
+                    (dataMin: number) => dataMin * CHART_Y_DOMAIN_MARGIN_MIN,
+                    (dataMax: number) => dataMax * CHART_Y_DOMAIN_MARGIN_MAX,
+                  ]}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<ChartTooltip />} />
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="price"
-                  stroke="#3b82f6"
+                  stroke={CHART_LINE_COLOR}
                   strokeWidth={3}
-                  dot={false}
+                  dot={({ cx, cy, index }) =>
+                    index === chartData.length - 1 ? (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={CHART_DOT_RADIUS}
+                        fill={CHART_LINE_COLOR}
+                        className="animate-pulse"
+                      />
+                    ) : null
+                  }
                   activeDot={{ r: 6, strokeWidth: 0 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-96 flex items-center justify-center text-gray-400">
-            <p>No price history available yet. Price updates will appear here as they arrive.</p>
+          <div className="h-64 sm:h-80 lg:h-96 flex items-center justify-center text-gray-400">
+            <p>{TEXT.chart.noData}</p>
           </div>
         )}
 
         <p className="text-xs text-gray-400 text-center">
-          Showing last {chartData.length} price update{chartData.length !== 1 ? 's' : ''} from WebSocket
+          {TEXT.chart.footer}
         </p>
         </div>
       </DialogContent>

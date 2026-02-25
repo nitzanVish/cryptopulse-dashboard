@@ -29,6 +29,7 @@ export const TEXT = {
     price: 'Price',
     change24h: '24h Change',
     marketCap: 'Market Cap',
+    sentiment: 'Sentiment',
   },
 
   // Error Messages
@@ -66,5 +67,18 @@ export const TEXT = {
     emptyWithSearch: 'No watchlist coins match your search',
     addToWatchlist: 'Add to watchlist',
     removeFromWatchlist: 'Remove from watchlist',
+  },
+
+  // Sentiment
+  sentiment: {
+    notAvailable: 'N/A',
+    notAvailableTooltip: 'Sentiment data not available for this asset',
+  },
+
+  // Price Chart
+  chart: {
+    loading: 'Loading chart...',
+    noData: 'No chart data available for the past 24 hours.',
+    footer: 'Past 24 Hours • Live Updates',
   },
 } as const;

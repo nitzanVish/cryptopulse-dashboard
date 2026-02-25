@@ -9,6 +9,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { cryptoApi } from '../features/crypto/cryptoApi';
+import { sentimentApi } from '../features/sentiment/sentimentApi';
 import cryptoReducer from '../features/crypto/cryptoSlice';
 import watchlistReducer from '../features/watchlist/watchlistSlice';
 import { watchlistMiddleware } from '../features/watchlist/watchlistMiddleware';
@@ -20,6 +21,7 @@ import { watchlistMiddleware } from '../features/watchlist/watchlistMiddleware';
  * - crypto: Manages dynamic state (price updates from WebSocket, price history for charts)
  * - watchlist: Manages user's favorite coins (persisted to LocalStorage)
  * - cryptoApi: Handles RTK Query API calls and caching (stores initial coin data from CoinGecko)
+ * - sentimentApi: Handles RTK Query API calls and caching (stores sentiment analysis data)
  */
 export const store = configureStore({
   reducer: {
@@ -31,16 +33,17 @@ export const store = configureStore({
     // Watchlist slice for managing user's favorite coins
     watchlist: watchlistReducer,
     
-    // RTK Query API reducer (dynamically uses reducerPath from cryptoApi)
+    // RTK Query API reducers (dynamically uses reducerPath from each API)
     // This allows RTK Query to manage its own cache and API state
     [cryptoApi.reducerPath]: cryptoApi.reducer,
+    [sentimentApi.reducerPath]: sentimentApi.reducer,
   },
   
   // Middleware configuration
   // RTK Query requires its middleware to handle API calls and caching
   // Watchlist middleware persists watchlist to LocalStorage
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(cryptoApi.middleware, watchlistMiddleware),
+    getDefaultMiddleware().concat(cryptoApi.middleware, sentimentApi.middleware, watchlistMiddleware),
 });
 
 /**

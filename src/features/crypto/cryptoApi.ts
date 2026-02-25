@@ -6,18 +6,36 @@
  */
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { CoinGeckoCoin, CryptoCoin, CryptoCoinsData } from '../../types/crypto';
+import type {
+  CoinGeckoCoin,
+  CoinGeckoMarketChartResponse,
+  CryptoCoin,
+  CryptoCoinsData,
+} from '../../types/crypto';
+import type { ChartDataPoint } from '../../types/chart';
 import { getBinanceSymbol } from '../../utils/symbolMapper';
-
-const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
+import { formatTimeAxis } from '../../utils/dateUtils';
+import { API_CONFIG, COINGECKO_BASE_URL } from '../../constants/api';
 
 export const cryptoApi = createApi({
-  reducerPath: 'cryptoApi',
+  reducerPath: API_CONFIG.REDUCER_PATHS.CRYPTO,
   baseQuery: fetchBaseQuery({
-    baseUrl: COINGECKO_API_BASE,
+    baseUrl: COINGECKO_BASE_URL,
   }),
-  tagTypes: ['Crypto'],
+  tagTypes: [API_CONFIG.TAG_TYPES.CRYPTO],
   endpoints: (builder) => ({
+    getMarketChart: builder.query<ChartDataPoint[], string>({
+      query: (id) => `/coins/${id}/market_chart?vs_currency=usd&days=1`,
+      transformResponse: (response: CoinGeckoMarketChartResponse): ChartDataPoint[] => {
+        if (!response?.prices?.length) return [];
+        return response.prices.map(([timestamp, price]) => ({
+          timestamp,
+          price,
+          time: formatTimeAxis(timestamp),
+        }));
+      },
+      keepUnusedDataFor: API_CONFIG.CACHE.CHART_KEEP_UNUSED_DATA_FOR,
+    }),
     getTopCryptos: builder.query<CryptoCoinsData, void>({
       query: () => 
         '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1',
@@ -43,9 +61,9 @@ export const cryptoApi = createApi({
         return { ids, entities, binanceMap };
       },
       
-      providesTags: ['Crypto'],
+      providesTags: [API_CONFIG.TAG_TYPES.CRYPTO],
     }),
   }),
 });
 
-export const { useGetTopCryptosQuery } = cryptoApi;
+export const { useGetTopCryptosQuery, useGetMarketChartQuery } = cryptoApi;

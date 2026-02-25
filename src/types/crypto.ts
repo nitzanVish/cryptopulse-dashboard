@@ -6,6 +6,14 @@
  */
 
 /**
+ * CoinGecko API market_chart response structure
+ * Prices array of [timestamp_ms, price] for historical chart data
+ */
+export interface CoinGeckoMarketChartResponse {
+  prices: [number, number][];
+}
+
+/**
  * CoinGecko API response structure
  * Represents a cryptocurrency coin from CoinGecko's /coins/markets endpoint
  */
@@ -37,24 +45,6 @@ export interface BinanceTicker {
 export interface CryptoCoin extends CoinGeckoCoin {
   binanceSymbol: string; // Binance trading pair symbol (e.g., 'BTCUSDT')
   lastUpdated?: number; // Timestamp of the last price update from WebSocket
-}
-
-/**
- * Price history entry for chart visualization
- * Stores timestamp and price for a single data point
- */
-export interface PriceHistory {
-  timestamp: number; // Unix timestamp in milliseconds
-  price: number; // Price at this timestamp
-}
-
-/**
- * Chart data structure for a specific coin
- * Contains the coin ID and its price history array
- */
-export interface ChartData {
-  coinId: string; // CoinGecko coin ID
-  history: PriceHistory[]; // Array of price history points (max 30)
 }
 
 /**

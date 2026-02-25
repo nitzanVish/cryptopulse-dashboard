@@ -6,7 +6,7 @@
  */
 
 import { memo } from 'react';
-import type { CryptoCoin } from '@/types/crypto';
+import type { CryptoRowProps } from '@/types/components';
 import { TableRow, TableCell } from '@/components/ui/table';
 import {
   formatPercentage,
@@ -14,15 +14,13 @@ import {
   getPriceChangeColor,
 } from '@/features/crypto/cryptoUtils';
 import { PriceTag } from './PriceTag';
+import { SentimentBadge } from './SentimentBadge';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { toggleWatchlist, selectIsInWatchlist } from '@/features/watchlist/watchlistSlice';
 import { Star } from 'lucide-react';
 import { TEXT } from '@/constants/text';
+import { handleImageError } from '@/utils/imageUtils';
 
-interface CryptoRowProps {
-  coin: CryptoCoin;
-  onSelect: (coin: CryptoCoin) => void;
-}
 export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
   const dispatch = useAppDispatch();
   
@@ -53,9 +51,7 @@ export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
             src={coin.image}
             alt={coin.name}
             className="w-8 h-8 rounded-full"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="%23ccc"/></svg>';
-            }}
+            onError={handleImageError}
           />
           <div className="flex flex-col">
             <span className="font-medium">{coin.name}</span>
@@ -92,6 +88,10 @@ export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
         <span className="text-muted-foreground">
           {formatCompactCurrency(coin.market_cap)}
         </span>
+      </TableCell>
+
+      <TableCell className="hidden lg:table-cell">
+        <SentimentBadge symbol={coin.symbol} />
       </TableCell>
     </TableRow>
   );

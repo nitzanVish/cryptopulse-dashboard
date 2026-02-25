@@ -6,46 +6,33 @@
  * when other coins' prices change.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useGetTopCryptosQuery } from '@/features/crypto/cryptoApi';
-import { filterCoins } from '@/features/crypto/cryptoUtils';
 import { DataCard, TableSkeleton, ErrorMessage, EmptyState } from '@/components/ui';
 import { Table, TableHeader, TableHead, TableBody, TableRow } from '@/components/ui/table';
 import { CryptoRow } from './CryptoRow';
 import { PriceChart } from './PriceChart';
 import { SearchBar } from './SearchBar';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useAppSelector } from '@/hooks/redux';
+import { useFilteredCoins } from '@/hooks/useFilteredCoins';
 import { Button } from '@/components/ui/button';
 import { TEXT } from '@/constants/text';
 import type { CryptoCoin } from '@/types/crypto';
+
 export function CryptoTable() {
   const { data: coinsData, isLoading, error } = useGetTopCryptosQuery();
-  const watchlistMap = useAppSelector((state) => state.watchlist.coinIds);
-  const [showWatchlistOnly, setShowWatchlistOnly] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const {
+    filteredCoinIds,
+    searchTerm,
+    setSearchTerm,
+    showWatchlistOnly,
+    setShowWatchlistOnly,
+    watchlistMap,
+  } = useFilteredCoins(coinsData);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
 
-  // Stable function reference prevents creating new function on each render
   const handleSelectCoin = useCallback((coin: CryptoCoin) => {
     setSelectedCoin(coin);
   }, []);
-
-  // O(1) map lookup for watchlist filtering instead of O(n) array.includes()
-  const filteredCoinIds = useMemo(() => {
-    if (!coinsData) return [];
-    
-    let coinIdsToFilter = coinsData.ids;
-    if (showWatchlistOnly) {
-      coinIdsToFilter = coinIdsToFilter.filter((id) => watchlistMap[id] === true);
-    }
-    
-    return filterCoins(
-      { ids: coinIdsToFilter, entities: coinsData.entities },
-      debouncedSearchTerm
-    );
-  }, [coinsData, showWatchlistOnly, watchlistMap, debouncedSearchTerm]);
   if (isLoading) {
     return (
       <DataCard title={TEXT.cryptoTable.title}>
@@ -73,7 +60,6 @@ export function CryptoTable() {
     );
   }
 
-  // Main content - table with cryptocurrency data and search
   return (
     <DataCard title={TEXT.cryptoTable.title}>
       <div className="mb-4 flex flex-col sm:flex-row gap-2">
@@ -108,6 +94,7 @@ export function CryptoTable() {
                 <TableHead className="min-w-[120px]">{TEXT.tableHeaders.price}</TableHead>
                 <TableHead className="hidden sm:table-cell min-w-[100px]">{TEXT.tableHeaders.change24h}</TableHead>
                 <TableHead className="hidden md:table-cell min-w-[120px]">{TEXT.tableHeaders.marketCap}</TableHead>
+                <TableHead className="hidden lg:table-cell">{TEXT.tableHeaders.sentiment}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

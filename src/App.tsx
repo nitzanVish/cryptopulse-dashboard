@@ -1,10 +1,13 @@
 import { Dashboard } from './components/layout/Dashboard';
 import { ErrorBoundary } from './components/ui/error-boundary';
+import { TooltipProvider } from './components/ui/tooltip';
 
 function App() {
   return (
     <ErrorBoundary>
-      <Dashboard />
+      <TooltipProvider>
+        <Dashboard />
+      </TooltipProvider>
     </ErrorBoundary>
   );
 }

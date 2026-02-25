@@ -1,27 +1,19 @@
 /**
  * useDebounce Hook
- * 
+ *
  * Custom hook for debouncing values to optimize performance.
  * Useful for search inputs, API calls, and other operations that should
  * not execute on every keystroke.
- * 
+ *
  * @param value - The value to debounce
- * @param delay - Delay in milliseconds (default: 300ms)
+ * @param delay - Delay in milliseconds (default: SEARCH_DEBOUNCE_MS from constants)
  * @returns Debounced value
- * 
- * @example
- * const [searchTerm, setSearchTerm] = useState('');
- * const debouncedSearch = useDebounce(searchTerm, 300);
- * 
- * useEffect(() => {
- *   // This will only run 300ms after user stops typing
- *   performSearch(debouncedSearch);
- * }, [debouncedSearch]);
  */
 
 import { useState, useEffect } from 'react';
+import { SEARCH_DEBOUNCE_MS } from '@/constants/ui';
 
-export function useDebounce<T>(value: T, delay: number = 300): T {
+export function useDebounce<T>(value: T, delay: number = SEARCH_DEBOUNCE_MS): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {

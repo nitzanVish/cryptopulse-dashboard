@@ -8,17 +8,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { formatCurrency } from '@/features/crypto/cryptoUtils';
 import type { PriceChangeDirection } from '@/types/crypto';
+import type { PriceTagProps } from '@/types/components';
 import {
   PRICE_CHANGE_DIRECTION,
   PRICE_CHANGE_COLORS,
   PRICE_CHANGE_ANIMATIONS,
   PRICE_TAG_BASE_CLASSES,
 } from '@/constants/styles';
-
-interface PriceTagProps {
-  price: number;
-  className?: string;
-}
 
 export function PriceTag({ price, className = '' }: PriceTagProps) {
   const [animationState, setAnimationState] = useState<PriceChangeDirection>(null);
