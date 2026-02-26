@@ -4,13 +4,14 @@ A modern, real-time cryptocurrency dashboard built with React, TypeScript, and R
 
 ![CryptoPulse Dashboard](./docs/screenshot-dashboard.png)
 
-*Bitcoin price chart (24h + live):*  
+*Bitcoin price chart (24h + live) with AI sentiment analysis:*  
 ![Price Chart Modal](./docs/screenshot-chart.png)
 
 ## 🚀 Features
 
 - **Real-time Price Updates**: Live cryptocurrency prices via Binance WebSocket
 - **Hybrid Price Charts**: 24h history from CoinGecko API with live-updating tip from Binance WebSocket (Recharts)
+- **AI Sentiment in Chart**: Price chart modal includes AI sentiment score in the header and an AI Analysis Insight panel with analysis text and last-updated time
 - **Watchlist**: Save favorite cryptocurrencies to LocalStorage
 - **Search & Filter**: Find cryptocurrencies by name or symbol
 - **Responsive Design**: Mobile-first design that works on all devices
@@ -30,6 +31,7 @@ A modern, real-time cryptocurrency dashboard built with React, TypeScript, and R
 ### APIs & Data Sources
 - **CoinGecko API** - Cryptocurrency static data and 24h price history (`market_chart`)
 - **Binance WebSocket** - Real-time price updates
+- **CryptoPulse API** - AI sentiment analysis (score, label, analysis text)
 
 ---
 
@@ -93,8 +95,12 @@ cryptopulse-dashboard/
 │   │   │   ├── CryptoRow.tsx
 │   │   │   ├── PriceChart.tsx
 │   │   │   ├── ChartTooltip.tsx
+│   │   │   ├── ChartStatusRow.tsx
+│   │   │   ├── AIInsightPanel.tsx
 │   │   │   ├── PriceTag.tsx
-│   │   │   └── SearchBar.tsx
+│   │   │   ├── SearchBar.tsx
+│   │   │   ├── SentimentBadge.tsx
+│   │   │   └── NoSentimentBadge.tsx
 │   │   ├── layout/           # Layout components
 │   │   │   └── Dashboard.tsx
 │   │   └── ui/               # Reusable UI components (shadcn/ui)
@@ -107,6 +113,8 @@ cryptopulse-dashboard/
 │   │   ├── crypto/           # Crypto feature (Redux slice + API)
 │   │   │   ├── cryptoSlice.ts
 │   │   │   └── cryptoApi.ts
+│   │   ├── sentiment/        # AI sentiment feature
+│   │   │   └── sentimentApi.ts
 │   │   └── watchlist/        # Watchlist feature
 │   │       ├── watchlistSlice.ts
 │   │       └── watchlistMiddleware.ts
@@ -136,7 +144,7 @@ cryptopulse-dashboard/
 ## 🎯 Key Features Overview
 
 - **Real-time Engine**: Connects to Binance WebSocket with auto-reconnect and exponential backoff. The Redux slice stores only the latest price per coin to prevent memory leaks.
-- **Hybrid Charts**: Merges cached 24h history (CoinGecko) with live WebSocket data in the component, avoiding RTK Query cache mutation.
+- **Hybrid Charts**: Merges cached 24h history (CoinGecko) with live WebSocket data in the component, avoiding RTK Query cache mutation. Chart modal displays AI sentiment score in the header and an AI Analysis Insight panel below.
 - **O(1) Performance**: Uses `transformResponse` in RTK Query to normalize arrays into dictionaries for instant lookups.
 - **Dynamic Formatting**: Smart currency formatter that adapts decimal places by asset value (e.g. micro-caps get up to 6 decimals so they don’t show as $0.00).
 - **Symbol Mapping**: Bridges CoinGecko IDs (e.g. `bitcoin`) and Binance pairs (e.g. `BTCUSDT`).

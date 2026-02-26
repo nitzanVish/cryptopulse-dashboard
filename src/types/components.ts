@@ -5,6 +5,8 @@
  */
 
 import type { CryptoCoin } from './crypto';
+import type { PriceChangeInfo } from './chart';
+import type { SentimentLabel } from './sentiment';
 
 export interface CryptoRowProps {
   coin: CryptoCoin;
@@ -25,5 +27,20 @@ export interface PriceChartProps {
 
 export interface PriceTagProps {
   price: number;
+  className?: string;
+}
+
+export interface ChartStatusRowProps {
+  price: number | undefined;
+  priceChange: PriceChangeInfo | null;
+  sentimentScore: number | null;
+  sentimentLabel: SentimentLabel | null;
+}
+
+export interface AIInsightPanelProps {
+  analysis: string;
+  timestamp: string;
+  score: number;
+  sentiment: SentimentLabel;
   className?: string;
 }

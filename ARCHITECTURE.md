@@ -2,7 +2,7 @@
 
 This document outlines the core architectural decisions made for the CryptoPulse frontend, focusing on state management, performance optimization, real-time data handling, and User Experience (UX).
 
-## 1. The "Hybrid Chart" Engine (History + Live Data)
+## 1. The "Hybrid Chart" Engine (History + Live Data + AI Sentiment)
 
 **The Challenge:** Displaying a professional financial chart requires a long history (24 hours), but WebSocket APIs (like Binance) only provide data from the moment of connection. Conversely, fetching full historical data via REST API (CoinGecko) for every coin upfront would immediately trigger rate limits (429 errors). Furthermore, CoinGecko's history has a 5-minute resolution, missing real-time volatility.
 
@@ -10,6 +10,7 @@ This document outlines the core architectural decisions made for the CryptoPulse
 
 - **Lazy Fetching:** The 24-hour historical data is only fetched on-demand when a user opens a specific coin's chart modal.
 - **The Hybrid Approach:** CoinGecko acts as the "Heavy Lifter" (fetching the 24h bulk data once), while Binance WS acts as the "Live Painter". We avoid HTTP polling entirely. Instead, every WebSocket tick creates a shallow copy of the last data point in the historical array and overwrites it with the live price. This ensures 99% of the chart remains stable, while the tip moves in real-time, maintaining data consistency across the UI.
+- **AI Sentiment Integration:** The chart modal enriches the view with AI sentiment analysis from the CryptoPulse API. A `ChartStatusRow` displays current price, 24h change, and AI sentiment score (e.g. 68/100) in the header. Below the chart, an `AIInsightPanel` shows the full analysis text, sentiment badge, and last-updated time—giving users context alongside the price history.
 
 ## 2. Caching Strategy & "Rolling Window" Prevention
 
@@ -46,3 +47,10 @@ This document outlines the core architectural decisions made for the CryptoPulse
 
 - **Strategic Omission of Memoization:** Intentionally avoided wrapping the `<PriceChart>` in `React.memo` or using `useMemo` for the array merging logic. Because the modal unmounts on close, and the live price dependency changes every second anyway, memoization would only add React evaluation overhead without providing any actual caching benefits.
 - **RTK Query Cache Immutability:** Directly mutating the RTK Query cache to update the last chart point would throw a strict mutation error. Instead, the component uses the spread operator (`...`) to create a new object instance solely for the final data point. This safely triggers React's shallow comparison, allowing the chart to re-render the live tip efficiently while respecting RTK Query's immutability rules.
+
+## 6. AI Sentiment in the Price Chart Modal
+
+**The Design:** When a user opens a coin's price chart modal, the view is augmented with AI sentiment data from the CryptoPulse API. The sentiment is fetched via `useGetAllSentimentsQuery` and selected by coin symbol. Two new presentational components structure the UI:
+
+- **ChartStatusRow:** Displays current price, 24h price change (amount and percent), and an AI Sentiment badge (score/100 with color-coded variant). Keeps key metrics visible above the chart.
+- **AIInsightPanel:** Renders below the chart when sentiment data exists. Shows a lightbulb icon, "AI Analysis Insight" title, the analysis text, sentiment score badge, and relative "Last updated" time. Uses `formatRelativeTime` for human-readable timestamps (e.g. "36 mins ago").

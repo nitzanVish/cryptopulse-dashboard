@@ -2,11 +2,13 @@
  * PriceChart Component
  *
  * Hybrid chart: 24h history from CoinGecko API + live price at the last point from WebSocket.
+ * Includes AI sentiment status row and insight panel when sentiment data is available.
  */
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAppSelector } from '@/hooks/redux';
 import { useGetMarketChartQuery } from '@/features/crypto/cryptoApi';
+import { useGetAllSentimentsQuery } from '@/features/sentiment/sentimentApi';
 import { formatCurrency } from '@/features/crypto/cryptoUtils';
 import type { PriceChartProps } from '@/types/components';
 import { useChartData } from '@/hooks/useChartData';
@@ -18,6 +20,8 @@ import {
 } from '@/components/ui/dialog';
 import { Loading } from '@/components/ui/loading';
 import { ChartTooltip } from './ChartTooltip';
+import { ChartStatusRow } from './ChartStatusRow';
+import { AIInsightPanel } from './AIInsightPanel';
 import { TEXT } from '@/constants/text';
 import {
   CHART_LINE_COLOR,
@@ -26,10 +30,19 @@ import {
   CHART_Y_DOMAIN_MARGIN_MAX,
   CHART_DOT_RADIUS,
 } from '@/constants/chart';
+import { Loader2 } from 'lucide-react';
 
 export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
   const { data: historyData, isLoading } = useGetMarketChartQuery(coin?.id ?? '', {
     skip: !coin || !open,
+  });
+
+  const { sentimentData, isLoading: sentimentLoading } = useGetAllSentimentsQuery(undefined, {
+    skip: !open || !coin,
+    selectFromResult: ({ data, isLoading }) => ({
+      sentimentData: coin ? data?.[coin.symbol.toLowerCase()] : undefined,
+      isLoading,
+    }),
   });
 
   const currentPrice = useAppSelector((state) => {
@@ -54,28 +67,12 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-sm text-gray-400">Current Price</p>
-            <p className="text-xl sm:text-2xl font-bold text-white">
-              {currentPrice ? formatCurrency(currentPrice) : TEXT.common.notAvailable}
-            </p>
-          </div>
-          {priceChange && (
-            <div className="text-left sm:text-right">
-              <p className="text-sm text-gray-400">Change</p>
-              <p
-                className={`text-lg sm:text-xl font-semibold ${
-                  priceChange.change >= 0 ? 'text-green-400' : 'text-red-400'
-                }`}
-              >
-                {priceChange.change >= 0 ? '+' : ''}
-                {formatCurrency(priceChange.change)} ({priceChange.changePercent >= 0 ? '+' : ''}
-                {priceChange.changePercent.toFixed(2)}%)
-              </p>
-            </div>
-          )}
-        </div>
+        <ChartStatusRow
+          price={currentPrice}
+          priceChange={priceChange}
+          sentimentScore={sentimentData?.score ?? null}
+          sentimentLabel={sentimentData?.sentiment ?? null}
+        />
 
         {isLoading ? (
           <div className="h-64 sm:h-80 lg:h-96 w-full flex items-center justify-center">
@@ -132,6 +129,21 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
         <p className="text-xs text-gray-400 text-center">
           {TEXT.chart.footer}
         </p>
+
+        {sentimentLoading && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>{TEXT.chart.loadingSentiment}</span>
+          </div>
+        )}
+        {!sentimentLoading && sentimentData && (
+          <AIInsightPanel
+            analysis={sentimentData.analysis}
+            timestamp={sentimentData.timestamp}
+            score={sentimentData.score}
+            sentiment={sentimentData.sentiment}
+          />
+        )}
         </div>
       </DialogContent>
     </Dialog>

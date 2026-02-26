@@ -80,5 +80,9 @@ export const TEXT = {
     loading: 'Loading chart...',
     noData: 'No chart data available for the past 24 hours.',
     footer: 'Past 24 Hours • Live Updates',
+    aiInsightTitle: 'AI Analysis Insight',
+    lastUpdated: 'Last updated',
+    loadingSentiment: 'Loading sentiment...',
+    sentimentNotAvailable: 'Sentiment analysis not available',
   },
 } as const;
