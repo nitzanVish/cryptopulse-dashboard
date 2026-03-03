@@ -39,3 +39,9 @@ export type SentimentsMap = Record<string, SentimentData>;
 export interface SentimentBadgeProps {
   symbol: string;
 }
+
+/** POST /api/v1/sentiment/analyze response */
+export interface AnalyzeResponse {
+  queued: string[];
+  skipped: string[];
+}

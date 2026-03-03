@@ -22,7 +22,9 @@ import { Loading } from '@/components/ui/loading';
 import { ChartTooltip } from './ChartTooltip';
 import { ChartStatusRow } from './ChartStatusRow';
 import { AIInsightPanel } from './AIInsightPanel';
+import { StablecoinInfoPanel } from './StablecoinInfoPanel';
 import { TEXT } from '@/constants/text';
+import { isStablecoin } from '@/constants/stablecoins';
 import {
   CHART_LINE_COLOR,
   CHART_GRID_STROKE,
@@ -143,6 +145,9 @@ export function PriceChart({ coin, open, onOpenChange }: PriceChartProps) {
             score={sentimentData.score}
             sentiment={sentimentData.sentiment}
           />
+        )}
+        {!sentimentLoading && !sentimentData && coin && isStablecoin(coin.symbol) && (
+          <StablecoinInfoPanel />
         )}
         </div>
       </DialogContent>

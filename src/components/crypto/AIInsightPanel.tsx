@@ -1,8 +1,3 @@
-/**
- * AIInsightPanel - Presentational panel showing AI sentiment analysis below the chart.
- * Title + icon, analysis text, and "Last updated" relative time.
- */
-
 import { Lightbulb } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/utils/dateUtils';

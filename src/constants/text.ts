@@ -73,6 +73,11 @@ export const TEXT = {
   sentiment: {
     notAvailable: 'N/A',
     notAvailableTooltip: 'Sentiment data not available for this asset',
+    stableBadge: 'Stable',
+    stableTooltip: 'Stablecoin pegged to USD — sentiment analysis is not applicable.',
+    stableInfoTitle: 'Stablecoin Asset',
+    stableInfoBody:
+      'Stable Asset: Pegged to the USD. As its price is designed to remain constant, sentiment-based movement prediction is not applicable.',
   },
 
   // Price Chart

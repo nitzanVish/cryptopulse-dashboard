@@ -44,3 +44,11 @@ export interface AIInsightPanelProps {
   sentiment: SentimentLabel;
   className?: string;
 }
+
+export interface NoSentimentBadgeProps {
+  symbol?: string;
+}
+
+export interface StablecoinInfoPanelProps {
+  className?: string;
+}

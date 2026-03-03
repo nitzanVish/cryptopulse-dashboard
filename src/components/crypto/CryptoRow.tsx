@@ -43,9 +43,9 @@ export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
   return (
     <TableRow 
       onClick={handleRowClick}
-      className="cursor-pointer hover:bg-muted/50 transition-colors"
+      className="group cursor-pointer hover:bg-muted/50 transition-colors"
     >
-      <TableCell>
+      <TableCell className="sticky left-0 z-10 bg-white dark:bg-zinc-950 group-hover:bg-slate-50 dark:group-hover:bg-zinc-900 transition-colors">
         <div className="flex items-center gap-3">
           <img
             src={coin.image}
@@ -53,8 +53,8 @@ export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
             className="w-8 h-8 rounded-full"
             onError={handleImageError}
           />
-          <div className="flex flex-col">
-            <span className="font-medium">{coin.name}</span>
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium truncate">{coin.name}</span>
             <span className="text-sm text-muted-foreground uppercase">{coin.symbol}</span>
           </div>
           <button
@@ -78,19 +78,19 @@ export const CryptoRow = memo<CryptoRowProps>(({ coin, onSelect }) => {
         <PriceTag price={currentPrice} />
       </TableCell>
 
-      <TableCell className="hidden sm:table-cell">
+      <TableCell>
         <span className={getPriceChangeColor(priceChangePercent)}>
           {formatPercentage(priceChangePercent)}
         </span>
       </TableCell>
 
-      <TableCell className="hidden md:table-cell">
+      <TableCell>
         <span className="text-muted-foreground">
           {formatCompactCurrency(coin.market_cap)}
         </span>
       </TableCell>
 
-      <TableCell className="hidden lg:table-cell">
+      <TableCell>
         <SentimentBadge symbol={coin.symbol} />
       </TableCell>
     </TableRow>

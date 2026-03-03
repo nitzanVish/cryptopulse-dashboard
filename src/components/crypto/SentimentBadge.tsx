@@ -30,7 +30,7 @@ export const SentimentBadge = memo<SentimentBadgeProps>(({ symbol }) => {
   }
 
   if (!sentimentData) {
-    return <NoSentimentBadge />;
+    return <NoSentimentBadge symbol={symbolLower} />;
   }
 
   const { sentiment, score, timestamp, analysis } = sentimentData;

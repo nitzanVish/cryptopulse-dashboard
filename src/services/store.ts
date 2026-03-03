@@ -12,6 +12,7 @@ import { cryptoApi } from '../features/crypto/cryptoApi';
 import { sentimentApi } from '../features/sentiment/sentimentApi';
 import cryptoReducer from '../features/crypto/cryptoSlice';
 import watchlistReducer from '../features/watchlist/watchlistSlice';
+import sentimentReducer from '../features/sentiment/sentimentSlice';
 import { watchlistMiddleware } from '../features/watchlist/watchlistMiddleware';
 
 /**
@@ -32,6 +33,9 @@ export const store = configureStore({
     
     // Watchlist slice for managing user's favorite coins
     watchlist: watchlistReducer,
+
+    // Sentiment slice for global throttle on on-demand analysis
+    sentiment: sentimentReducer,
     
     // RTK Query API reducers (dynamically uses reducerPath from each API)
     // This allows RTK Query to manage its own cache and API state

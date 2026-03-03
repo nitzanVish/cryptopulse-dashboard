@@ -1,8 +1,3 @@
-/**
- * ChartStatusRow - Presentational status row for the PriceChart modal.
- * Left: current price and optional 24h change. Right: AI sentiment score badge.
- */
-
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/features/crypto/cryptoUtils';
 import { TEXT } from '@/constants/text';
@@ -27,8 +22,8 @@ export function ChartStatusRow({
           <div className="text-left sm:text-right">
             <p className="text-sm text-gray-400">Change</p>
             <p
-              className={`text-lg sm:text-xl font-semibold ${
-                priceChange.change >= 0 ? 'text-green-400' : 'text-red-400'
+              className={`text-lg sm:text-xl font-bold ${
+                priceChange.change >= 0 ? 'text-green-300' : 'text-red-300'
               }`}
             >
               {priceChange.change >= 0 ? '+' : ''}

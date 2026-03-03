@@ -90,11 +90,11 @@ export function CryptoTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[200px]">{TEXT.tableHeaders.coin}</TableHead>
-                <TableHead className="min-w-[120px]">{TEXT.tableHeaders.price}</TableHead>
-                <TableHead className="hidden sm:table-cell min-w-[100px]">{TEXT.tableHeaders.change24h}</TableHead>
-                <TableHead className="hidden md:table-cell min-w-[120px]">{TEXT.tableHeaders.marketCap}</TableHead>
-                <TableHead className="hidden lg:table-cell">{TEXT.tableHeaders.sentiment}</TableHead>
+                <TableHead className="sticky left-0 z-10 bg-white dark:bg-zinc-950 min-w-[180px]">{TEXT.tableHeaders.coin}</TableHead>
+                <TableHead className="min-w-[110px]">{TEXT.tableHeaders.price}</TableHead>
+                <TableHead className="min-w-[90px]">{TEXT.tableHeaders.change24h}</TableHead>
+                <TableHead className="min-w-[100px]">{TEXT.tableHeaders.marketCap}</TableHead>
+                <TableHead className="min-w-[100px]">{TEXT.tableHeaders.sentiment}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
